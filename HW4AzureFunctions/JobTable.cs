@@ -65,6 +65,27 @@ namespace HW4AzureFunctions
             return jobEntityResponseList;
         }
 
+        public List<JobEntity> RetrieveAllSuccessJobEntities()
+        {
+            string filter = TableQuery.GenerateFilterCondition("StatusDescription", QueryComparisons.Equal, "Image Converted with Success");
+            TableQuery <JobEntity> tableQuery = new TableQuery<JobEntity>().Where(filter);
+            TableContinuationToken token = null;
+            List<JobEntity> jobEntityList = new List<JobEntity>();
+
+            do
+            {
+                var result = _table.ExecuteQuerySegmentedAsync(tableQuery, token).GetAwaiter().GetResult();
+                jobEntityList.AddRange(result.Results);
+                token = result.ContinuationToken;
+            }
+            while (token != null);
+
+            return jobEntityList;
+
+
+
+        }
+
         /// <summary>
         /// 
         /// </summary>
