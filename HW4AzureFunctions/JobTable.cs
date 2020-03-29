@@ -2,6 +2,7 @@
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HW4AzureFunctions
@@ -25,6 +26,43 @@ namespace HW4AzureFunctions
             _table.CreateIfNotExistsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
             _partitionKey = partitionKey;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<JobEntityResponse> RetrieveAllJobEntities()
+        {
+            TableQuery<JobEntity> tableQuery = new TableQuery<JobEntity>();
+            TableContinuationToken token = null;
+            List<JobEntity> jobEntityList = new List<JobEntity>();
+            List<JobEntityResponse> jobEntityResponseList = new List<JobEntityResponse>();
+
+            do
+            {
+                var result = _table.ExecuteQuerySegmentedAsync(tableQuery, token).GetAwaiter().GetResult();
+                jobEntityList.AddRange(result.Results);
+                token = result.ContinuationToken;
+            }
+            while (token != null);
+
+            foreach (JobEntity jobEntity in jobEntityList)
+            {
+                JobEntityResponse jobEntityResponse = new JobEntityResponse()
+                {
+                    JobId = jobEntity.RowKey,
+                    ImageConversionMode = jobEntity.ImageConversionMode,
+                    Status = jobEntity.Status,
+                    StatusDescription = jobEntity.StatusDescription,
+                    ImageSource = jobEntity.ImageSource,
+                    ImageResult = jobEntity.ImageResult,
+                };
+
+                jobEntityResponseList.Add(jobEntityResponse);
+            }
+
+            return jobEntityResponseList;
         }
 
         /// <summary>
