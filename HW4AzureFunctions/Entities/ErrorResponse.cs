@@ -1,4 +1,6 @@
-﻿namespace HW4AzureFunctions
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HW4AzureFunctions
 {
     /// <summary>
     /// Object used for displaying error information
@@ -9,6 +11,7 @@
         /// <summary>
         /// Numeric error the represents the issue
         /// </summary>
+        [Required]
         public int ErrorNumber { get; set; }
 
         /// <summary>
@@ -17,6 +20,7 @@
         /// If the error is not tied to a specific parameter, then
         /// this value can be null
         /// </summary>
+        [MaxLength(1024)]
         public string ParameterName { get; set; }
 
         /// <summary>
@@ -25,12 +29,15 @@
         /// If the error is not tied to a specific parameter,
         /// then this value can be null
         /// </summary>
+        [MaxLength(2048)]
         public string ParameterValue { get; set; }
 
         /// <summary>
         /// A description of the error, not localized, intended
         /// for developer consumption
         /// </summary>
+        [MaxLength(1024)]
+        [Required]
         public string ErrorDescription { get; set; }
 
         public static ErrorResponse New(int ErrorNumber, string ParameterName, string ParameterValue, string ErrorDescription)

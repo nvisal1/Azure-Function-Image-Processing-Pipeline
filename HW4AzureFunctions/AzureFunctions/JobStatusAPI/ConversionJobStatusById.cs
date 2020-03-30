@@ -23,6 +23,16 @@ namespace HW4AzureFunctions
         [FunctionName("ConversionJobStatusById")]
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "jobs/{id}")] HttpRequest req, string id, ILogger log)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return new BadRequestObjectResult("The query string id is required");
+            }
+
+            if (id.Length > 36)
+            {
+                return new BadRequestObjectResult("An id cannot be greater than 36 characters");
+            }
+
             log.LogInformation("[PENDING] Connecting to jobs table...");
             JobTable jobTable = new JobTable(log, ConfigSettings.IMAGEJOBS_PARTITIONKEY);
             log.LogInformation("[SUCCESS] Connected to Jobs Table");

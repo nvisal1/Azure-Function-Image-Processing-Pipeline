@@ -1,4 +1,6 @@
-﻿namespace HW4AzureFunctions
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HW4AzureFunctions
 {
     /// <summary>
     /// DTO for job entity. This object is
@@ -15,6 +17,7 @@
         /// Note: This is not the id assigned to
         /// converted images
         /// </summary>
+        [MaxLength(36)]
         public string JobId { get; set; }
 
         /// <summary>
@@ -47,12 +50,14 @@
         /// 
         /// This value is not intended to contain a stack trace
         /// </summary>
+        [MaxLength(512)]
         public string StatusDescription { get; set; }
 
         /// <summary>
         /// This is the URL to the blob storage entry 
         /// for the image uploaded to be converted
         /// </summary>
+        [MaxLength(512)]
         public string ImageSource { get; set; }
 
         /// <summary>
@@ -60,6 +65,7 @@
         /// for the blob that contains the converted
         /// or failed to be converted image
         /// </summary>
+        [MaxLength(512)]
         public string ImageResult { get; set; }
 
         public static JobEntityResponse New(string JobId, string ImageConversionMode, int Status, string StatusDescription, string ImageSource, string ImageResult)
