@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using HW4AzureFunctions.AzureFunctions.ImagesConverters;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 
@@ -26,7 +26,9 @@ namespace HW4AzureFunctions
         [FunctionName("imageconsumergreyscale")]
         public static async void Run([BlobTrigger(route, Connection = ConfigSettings.STORAGE_CONNECTIONSTRING_NAME)]Stream myBlob, string name, ILogger log)
         {
+            log.LogInformation("[PENDING] Connecting to blob storage...");
             BlobStorage blobStorage = new BlobStorage();
+            log.LogInformation("[SUCCESS] Connected to blob storage");
 
             string imageSourceURI = $"{Environment.GetEnvironmentVariable(ConfigSettings.STORAGE_DOMAIN_METADATA_NAME)}/{ConfigSettings.TO_GREY_SCALE_CONTAINER_NAME}/{name}";
 
@@ -34,37 +36,43 @@ namespace HW4AzureFunctions
 
             JobEntity initialJobEntity = JobEntity.New(jobId, ConversionModeNames.GREY_SCALE, JobStatusCodes.IMAGE_OBTAINED, JobStatusMessages.IMAGE_OBTAINED, imageSourceURI, "");
 
-            await UpdateJobTableWithStatus(log, initialJobEntity);
+            log.LogInformation("[PENDING] Adding initial job entry to table...");
+            await Shared.UpdateJobTableWithStatus(log, initialJobEntity);
+            log.LogInformation("[SUCCESS] Initial job entry added to table");
 
             string convertedBlobName = $"{Guid.NewGuid()}-{name}";
 
             try
             {
+                log.LogInformation("[PENDING] Applying grey scale filter to image...");
                 MemoryStream convertedMemoryStream = ImageConverter.ConvertImageToGreyScale(myBlob);
+                log.LogInformation("[SUCCESS] Applied grey scale filter to image");
 
                 JobEntity convertInProgressJobEntity = JobEntity.New(jobId, ConversionModeNames.GREY_SCALE, JobStatusCodes.BEING_CONVERTED, JobStatusMessages.BEING_CONVERTED, imageSourceURI, "");
 
-                await UpdateJobTableWithStatus(log, convertInProgressJobEntity);
+                log.LogInformation("[PENDING] Updating job status to conversion-in-progress");
+                await Shared.UpdateJobTableWithStatus(log, convertInProgressJobEntity);
+                log.LogInformation("[SUCCESS] Job status updated to conversion-in-progress");
 
+                log.LogInformation("[PENDING] Uploading converted image to converted images container...");
                 blobStorage.UploadConvertedImage(initialJobEntity, convertedBlobName, convertedMemoryStream);
+                log.LogInformation("[SUCCESS] Converted image uploaded to converted images container");
             }
             catch (Exception e)
             {
+                log.LogError("An error occured while converting the image");
+
                 try
                 {
+                    log.LogInformation("[PENDING] Uploading original image to failed container...");
                     blobStorage.UploadFailedImage(initialJobEntity, convertedBlobName, myBlob);
+                    log.LogInformation("[SUCCESS] Original image uploaded to failed container");
                 }
                 catch (Exception ex)
                 {
                     log.LogError("Failed to upload image to failed container");
                 }
             }
-        }
-
-        private static async Task UpdateJobTableWithStatus(ILogger log, JobEntity jobEntity)
-        {
-            JobTable jobTable = new JobTable(log, ConfigSettings.IMAGEJOBS_PARTITIONKEY);
-            await jobTable.InsertOrReplaceJobEntity(jobEntity);
         }
     }
 }

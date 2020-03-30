@@ -20,9 +20,13 @@ namespace HW4AzureFunctions
         [FunctionName("ConversionJobStatus")]
         public static ActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "jobs")] HttpRequest req, ILogger log)
         {
+            log.LogInformation("[PENDING] Connecting to jobs table...");
             JobTable jobTable = new JobTable(log, ConfigSettings.IMAGEJOBS_PARTITIONKEY);
+            log.LogInformation("[SUCCESS] Connected to Jobs Table");
 
+            log.LogInformation("[PENDING] Getting all job entities...");
             List<JobEntityResponse> jobEntityList = jobTable.RetrieveAllJobEntities();
+            log.LogInformation("[SUCCESS] Retrieved all job entities");
 
             return new OkObjectResult(jobEntityList);
         }

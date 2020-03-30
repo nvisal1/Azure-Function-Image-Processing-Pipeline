@@ -18,13 +18,24 @@ namespace HW4AzureFunctions
         [FunctionName("ConvertedImageRemover")]
         public static void Run([TimerTrigger("*/2 * * * *")]TimerInfo myTimer, ILogger log)
         {
+            log.LogInformation("[PENDING] Connecting to jobs table...");
             JobTable jobTable = new JobTable(log, ConfigSettings.IMAGEJOBS_PARTITIONKEY);
+            log.LogInformation("[SUCCESS] Connected to Jobs Table");
 
+
+            log.LogInformation("[PENDING] Searching for successful jobs...");
             List<JobEntity> jobEntityList = jobTable.RetrieveAllSuccessJobEntities();
+            log.LogInformation("[SUCCESS] Successful jobs found");
 
+
+            log.LogInformation("[PENDING] Connecting to blob storage...");
             BlobStorage blobStorage = new BlobStorage();
+            log.LogInformation("[SUCCESS] Connected to blob storage");
 
-            blobStorage.DeleteConvertedImages(jobEntityList);  
+
+            log.LogInformation("[PENDING] Deleting successful jobs...");
+            blobStorage.DeleteConvertedImages(jobEntityList);
+            log.LogInformation("[SUCCESS] Successful jobs deleted");
         }
     }
 }
