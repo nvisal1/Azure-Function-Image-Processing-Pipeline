@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using HW4AzureFunctions.Constants;
 
 namespace HW4AzureFunctions
 {
@@ -18,26 +19,13 @@ namespace HW4AzureFunctions
 
             if (jobEntity == null)
             {
-                ErrorResponse errorResponse = new ErrorResponse()
-                {
-                    ErrorNumber = 3,
-                    ParameterName = "jobId",
-                    ParameterValue = id,
-                    ErrorDescription = "The entity could not be founc"
-                };
+                ErrorResponse errorResponse = ErrorResponse.New(ErrorResponseCodes.NOT_FOUND, "JobId", id, ErrorResponseMessages.NOT_FOUND);
 
                 return new NotFoundObjectResult(errorResponse);
             }
 
-            JobEntityResponse jobEntityResponse = new JobEntityResponse()
-            {
-                JobId = jobEntity.RowKey,
-                ImageConversionMode = jobEntity.ImageConversionMode,
-                Status = jobEntity.Status,
-                StatusDescription = jobEntity.StatusDescription,
-                ImageSource = jobEntity.ImageSource,
-                ImageResult = jobEntity.ImageResult,
-            };
+            JobEntityResponse jobEntityResponse = JobEntityResponse.New(
+                jobEntity.RowKey, jobEntity.ImageConversionMode, jobEntity.Status, jobEntity.StatusDescription, jobEntity.ImageSource, jobEntity.ImageResult);
 
             return new OkObjectResult(jobEntityResponse);
         }
