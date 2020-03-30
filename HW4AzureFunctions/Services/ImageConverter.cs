@@ -5,8 +5,17 @@ using System.IO;
 
 namespace HW4AzureFunctions
 {
+    /// <summary>
+    /// Contains all logic for applying image filters
+    /// </summary>
     public class ImageConverter
     {
+        /// <summary>
+        /// Applies a sepia filter on the given image
+        /// and returns a new memory stream
+        /// </summary>
+        /// <param name="originalImage"></param>
+        /// <returns></returns>
         public static MemoryStream ConvertImageToSepia(Stream originalImage)
         {
             originalImage.Seek(0, SeekOrigin.Begin);
@@ -22,6 +31,12 @@ namespace HW4AzureFunctions
             return convertedMemoryStream;
         }
 
+        /// <summary>
+        /// Applies a grey scale filter on the given images
+        /// and returns a new memory stream
+        /// </summary>
+        /// <param name="originalImage"></param>
+        /// <returns></returns>
         public static MemoryStream ConvertImageToGreyScale(Stream originalImage)
         {
             originalImage.Seek(0, SeekOrigin.Begin);

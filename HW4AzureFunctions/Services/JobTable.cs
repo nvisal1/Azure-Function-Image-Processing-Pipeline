@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace HW4AzureFunctions
 {
+    /// <summary>
+    /// Contains all logic for managing
+    /// job entities within the jobs table
+    /// </summary>
     public class JobTable
     {
         private CloudTableClient _tableClient;
@@ -29,7 +33,11 @@ namespace HW4AzureFunctions
         }
 
         /// <summary>
-        /// 
+        /// Returns a JobEntityResponse DTO for
+        /// every job entity in the jobs table.
+        ///
+        /// This is intended to be used by the
+        /// job status API
         /// </summary>
         /// <returns></returns>
         public List<JobEntityResponse> RetrieveAllJobEntities()
@@ -39,6 +47,8 @@ namespace HW4AzureFunctions
             List<JobEntity> jobEntityList = new List<JobEntity>();
             List<JobEntityResponse> jobEntityResponseList = new List<JobEntityResponse>();
 
+            // Continue to make requests until no continuation token is found
+            // The table API will respond with up to 1000 results
             do
             {
                 var result = _table.ExecuteQuerySegmentedAsync(tableQuery, token).GetAwaiter().GetResult();
@@ -65,6 +75,10 @@ namespace HW4AzureFunctions
             return jobEntityResponseList;
         }
 
+        /// <summary>
+        /// Return all job entites that have a status of success
+        /// </summary>
+        /// <returns></returns>
         public List<JobEntity> RetrieveAllSuccessJobEntities()
         {
             string filter = TableQuery.GenerateFilterCondition("StatusDescription", QueryComparisons.Equal, "Image Converted with Success");
@@ -87,7 +101,7 @@ namespace HW4AzureFunctions
         }
 
         /// <summary>
-        /// 
+        /// Returns the job entity that has the given jobId
         /// </summary>
         /// <param name="jobId"></param>
         /// <returns></returns>
@@ -100,7 +114,8 @@ namespace HW4AzureFunctions
         }
 
         /// <summary>
-        /// 
+        /// Replace the corresponding job entity with the
+        /// given job entity
         /// </summary>
         /// <param name="jobEntity"></param>
         /// <returns></returns>
@@ -118,7 +133,7 @@ namespace HW4AzureFunctions
         }
 
         /// <summary>
-        /// 
+        /// Updates the status of a job entity
         /// </summary>
         /// <param name="jobId"></param>
         /// <param name="status"></param>
@@ -139,7 +154,7 @@ namespace HW4AzureFunctions
         }
 
         /// <summary>
-        /// 
+        /// Upserts the given job entity
         /// </summary>
         /// <param name="jobEntity"></param>
         /// <returns></returns>

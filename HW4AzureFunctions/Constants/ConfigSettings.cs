@@ -4,6 +4,9 @@ using System.Text;
 
 namespace HW4AzureFunctions
 {
+    /// <summary>
+    /// Contains metadata and labels related to Azure Storage
+    /// </summary>
     class ConfigSettings
     {
         public const string STORAGE_CONNECTIONSTRING_NAME = "AzureWebJobsStorage";

@@ -1,6 +1,9 @@
 ﻿namespace HW4AzureFunctions
 {
-    static class JobStatusCodes
+    /// <summary>
+    /// Contains job status codes
+    /// </summary>
+    public class JobStatusCodes
     {
         public static readonly int IMAGE_OBTAINED = 1;
 

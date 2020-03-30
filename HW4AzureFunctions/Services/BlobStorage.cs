@@ -7,6 +7,10 @@ using System.IO;
 
 namespace HW4AzureFunctions
 {
+    /// <summary>
+    /// Contains all logic for managing blobs
+    /// in Azure Blob Storage
+    /// </summary>
     public class BlobStorage
     {
         private CloudStorageAccount _storageAccount;
@@ -20,6 +24,14 @@ namespace HW4AzureFunctions
             _blobClient = _storageAccount.CreateCloudBlobClient();
         }
 
+        /// <summary>
+        /// Accepts a list of Job Entities. Each entity
+        /// is deleted from its origin container.
+        /// 
+        /// The given list should only contain job entities that
+        /// are completed
+        /// </summary>
+        /// <param name="jobEntityList"></param>
         public async void DeleteConvertedImages(List<JobEntity> jobEntityList)
         {
             CloudBlobContainer convertToGreyScaleContainer = _blobClient.GetContainerReference(ConfigSettings.TO_GREY_SCALE_CONTAINER_NAME);
@@ -32,12 +44,12 @@ namespace HW4AzureFunctions
 
                 string imageName = imageSourceArray[imageSourceArray.Length - 1];
 
-                if (jobEntity.ImageConversionMode.Equals("Sepia"))
+                if (jobEntity.ImageConversionMode.Equals(ConversionModeNames.SEPIA))
                 {
                     CloudBlockBlob blob = convertToSepiaContainer.GetBlockBlobReference(imageName);
                     await blob.DeleteIfExistsAsync();
                 }
-                else if (jobEntity.ImageConversionMode.Equals("GreyScale"))
+                else if (jobEntity.ImageConversionMode.Equals(ConversionModeNames.GREY_SCALE))
                 {
                     CloudBlockBlob blob = convertToGreyScaleContainer.GetBlockBlobReference(imageName);
                     await blob.DeleteIfExistsAsync();
@@ -45,6 +57,14 @@ namespace HW4AzureFunctions
             }
         }
 
+        /// <summary>
+        /// Uploads a given image to the converted images container
+        /// 
+        /// The given image should already have the desired filter applied
+        /// </summary>
+        /// <param name="jobEntity"></param>
+        /// <param name="blobName"></param>
+        /// <param name="convertedImage"></param>
         public async void UploadConvertedImage(JobEntity jobEntity, string blobName, MemoryStream convertedImage)
         {
             CloudBlobContainer convertedImagesContainer = _blobClient.GetContainerReference(ConfigSettings.CONVERTED_IMAGES_CONTAINER_NAME);
@@ -57,6 +77,14 @@ namespace HW4AzureFunctions
             await convertedBlockBlob.UploadFromStreamAsync(convertedImage);
         }
 
+        /// <summary>
+        /// Uploads a given image to the failed images container
+        /// 
+        /// The given image is expected to be the original source
+        /// </summary>
+        /// <param name="jobEntity"></param>
+        /// <param name="blobName"></param>
+        /// <param name="originalImage"></param>
         public async void UploadFailedImage(JobEntity jobEntity, string blobName, Stream originalImage)
         {
             CloudBlobContainer failedImagesContainer = _blobClient.GetContainerReference(ConfigSettings.FAILED_IMAGES_CONTAINER_NAME);
